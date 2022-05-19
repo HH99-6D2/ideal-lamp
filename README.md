@@ -1,2 +1,2 @@
 # ideal-lamp
-Nodejs based Chatting socket reboot
+Nodejs based Chatting socket reboot task
