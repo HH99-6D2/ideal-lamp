@@ -15,7 +15,7 @@ const createMockRepository = <T = any>(): MockRepository<T> => ({
 
 describe('RoomsController', () => {
   let controller: RoomsController;
-  let rommsService: RoomsService;
+  let roomsService: RoomsService;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,7 +30,7 @@ describe('RoomsController', () => {
     }).compile();
 
     controller = module.get<RoomsController>(RoomsController);
-    rommsService = module.get<RoomsService>(RoomsService);
+    roomsService = module.get<RoomsService>(RoomsService);
   });
   it('should be defined', () => {
     expect(controller).toBeDefined();

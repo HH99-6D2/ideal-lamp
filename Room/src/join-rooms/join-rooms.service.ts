@@ -15,7 +15,7 @@ export class JoinRoomsService {
       roomId,
       userId,
     });
-    await this.joinRoomsRepository.save(room);
+    await room.save()
   }
 
   async leaveRoom(roomId: number, userId: number): Promise<void> {

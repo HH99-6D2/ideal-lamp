@@ -15,7 +15,7 @@ export class LikesService {
       roomId,
       userId,
     });
-    await this.likeRepository.save(like);
+    await like.save();
   }
 
   async deleteLike(roomId: number, userId: number): Promise<void> {

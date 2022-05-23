@@ -138,7 +138,7 @@ export class RoomsController {
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
   ) {
-    const response = await this.roomsService.deleteRoom(id, 1);
+    const response = await this.roomsService.deleteRoom(id, 5);
     // const response = await this.roomsService.deleteRoom(id, user.id);
 
     return response;

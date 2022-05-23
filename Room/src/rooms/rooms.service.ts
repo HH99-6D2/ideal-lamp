@@ -243,7 +243,6 @@ export class RoomsService {
         .where({ roomId: findRoom.id })
         .getCount();
       resRoom.joinCnt = joinCnt;
-
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
@@ -343,7 +342,8 @@ export class RoomsService {
           const insertTag = this.tagRepository.create({
             name: tag.toString(),
           });
-          await this.tagRepository.save(insertTag);
+          await insertTag.save();
+
           roomTags.push(insertTag);
         }
       }
@@ -357,7 +357,7 @@ export class RoomsService {
         tags: roomTags,
       });
 
-      const response = await this.roomRepository.save(room);
+      const response = await room.save();
 
       return {
         status: 'success',
@@ -394,7 +394,7 @@ export class RoomsService {
           const insertTag = this.tagRepository.create({
             name: tag.toString(),
           });
-          await this.tagRepository.save(insertTag);
+          await insertTag.save();
           roomTags.push(insertTag);
         }
       }
@@ -429,7 +429,7 @@ export class RoomsService {
     findRoom.status = 2;
 
     try {
-      this.roomRepository.save(findRoom);
+      await findRoom.save();
     } catch (err) {
       throw new InternalServerErrorException(err);
     }

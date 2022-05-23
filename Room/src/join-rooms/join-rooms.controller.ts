@@ -11,23 +11,23 @@ export class JoinRoomsController {
   constructor(private readonly joinRoomsService: JoinRoomsService) {}
   
   // 채팅방 참여
-  @Get('/:ronnId')
+  @Get('/:roomId')
   @ApiOperation({ summary: '채팅방 참여 API' })
-  async joinRoom(@Param('ronnId', ParseIntPipe) ronnId: number, @GetUser() user: User) {
-    const response = await this.joinRoomsService.joinRoom(ronnId, 1);
-    // const response = await this.joinRoomsService.joinRoom(ronnId, user.id);
+  async joinRoom(@Param('roomId', ParseIntPipe) roomId: number, @GetUser() user: User) {
+    const response = await this.joinRoomsService.joinRoom(roomId, 1);
+    // const response = await this.joinRoomsService.joinRoom(roomId, user.id);
     return response;
   }
 
   // 채팅방 나가기
-  @Delete('/:ronnId')
+  @Delete('/:roomId')
   @ApiOperation({ summary: '채팅방 나가기 API' })
   async leaveRoom(
-    @Param('ronnId', ParseIntPipe) ronnId: number,
+    @Param('roomId', ParseIntPipe) roomId: number,
     @GetUser() user: User,
   ) {
-    const response = await this.joinRoomsService.leaveRoom(ronnId, 1);
-    // const response = await this.joinRoomsService.leaveRoom(ronnId, user.id);
+    const response = await this.joinRoomsService.leaveRoom(roomId, 1);
+    // const response = await this.joinRoomsService.leaveRoom(roomId, user.id);
     return response;
   }
 }
