@@ -11,7 +11,6 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,7 +33,10 @@ export class Room extends BaseEntity {
   positionY: number;
 
   @Column()
-  cateogory: string;
+  spot: string;
+
+  @Column()
+  category: string;
 
   @Column()
   startDate: Date;
@@ -48,7 +50,13 @@ export class Room extends BaseEntity {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @ManyToMany(() => Tag)
+  @Column({ type: 'tinyint', default: 0 }) // 0: 대기, 1: 활성, 2: 종료
+  status: number;
+
+  @Column()
+  imageUrl: string;
+
+  @ManyToMany(() => Tag, (tag) => tag.id)
   @JoinTable()
   tags: Tag[];
 
@@ -57,15 +65,15 @@ export class Room extends BaseEntity {
 
   @ManyToOne(() => RegionA, (regionA) => regionA.id)
   @JoinColumn({
-    name: 'regionAId',
+    name: 'regionA',
     referencedColumnName: 'id',
   })
-  regionAId: number;
+  regionA: number;
 
   @ManyToOne(() => RegionB, (regionB) => regionB.id)
   @JoinColumn({
-    name: 'regionBId',
+    name: 'regionB',
     referencedColumnName: 'id',
   })
-  regionBId: number;
+  regionB: number;
 }
