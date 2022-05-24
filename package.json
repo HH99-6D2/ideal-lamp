@@ -1,0 +1,36 @@
+{
+	"name": "ideal-lamp",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "npm run format && npm run lint && node src/server.js",
+		"dev": "nodemon src/server.js",
+		"test": "tap --reporter=list --watch",
+		"format": "prettier --write \"src/**/*.js\" \"src/*.js\"",
+		"lint": "eslint \"{src,apps,libs,test}/**/*.js\"",
+		"test": "tap --reporter=list --watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/HH99-6D2/ideal-lamp.git"
+	},
+	"author": "junehan",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/HH99-6D2/ideal-lamp/issues"
+	},
+	"homepage": "https://github.com/HH99-6D2/ideal-lamp#readme",
+	"dependencies": {
+		"@fastify/cors": "^7.0.0",
+		"fastify": "^3.29.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.16.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"pino-pretty": "^7.6.1",
+		"prettier": "^2.6.2",
+		"tap": "^16.2.0"
+	}
+}
