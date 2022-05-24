@@ -56,7 +56,9 @@ export class Room extends BaseEntity {
   @Column()
   imageUrl: string;
 
-  @ManyToMany(() => Tag, (tag) => tag.id)
+  @ManyToMany(() => Tag, (tag) => tag.id, {
+    cascade:true
+  })
   @JoinTable()
   tags: Tag[];
 

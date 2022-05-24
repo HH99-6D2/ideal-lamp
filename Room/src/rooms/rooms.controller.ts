@@ -9,22 +9,35 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { ResponseRoomDto } from './dto/response-room.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from 'src/entities/user.interface';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import * as moment from 'moment-timezone';
 
 @Controller('rooms')
 @ApiTags('Room API')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
+
+  /**
+   * 채팅방 생성
+   * @Body {CreateRoomDto} createRoomDto 채팅방 생성 정보
+   * @GetUser {User} user 채팅방 생성 유저에 대한 고유 식별자
+   */
+  @Post('/')
+  @ApiOperation({ summary: '채팅방 생성 API' })
+  async createRoom(
+    @Body() createRoomDto: CreateRoomDto,
+    // @GetUser() user: User,
+  ) {
+    const response = await this.roomsService.createRoom(createRoomDto, 5);
+    return response;
+  }
+
   /**
    * 채팅방 추천 리스트 조회
    * @GetUser {User} user? = null 접속한 유저에 대한 고유식별자
@@ -43,6 +56,7 @@ export class RoomsController {
 
   /**
    * 채팅방 리스트 조건 조회
+   * @GetUser {User} user? = null 접속한 유저에 대한 고유식별자
    * @Param {string} category 채팅방 주제
    * @Querystring {string} tag 태그
    * @Querystring {date} startDate 시작 날짜
@@ -50,23 +64,30 @@ export class RoomsController {
    * @Querystring {string} regionAId 시/도 정보
    * @Querystring {string} regionBId 구/시 정보
    * @Querystring {number} sort 정렬 옵션 (1:좋아요순, 2:참여도순, 3:최신순)
-   * @GetUser {User} user? = null 접속한 유저에 대한 고유식별자
    */
-  @Get('/:category')
+  @Get('/search')
   @ApiOperation({ summary: '채팅방 리스트 조건 조회 API' })
   @ApiOkResponse({ type: ResponseRoomDto })
   getRoomsByQuery(
-    @Param('category') category: string,
-    @Query('tag') tag: string,
+    @Query('category') category: string,
+    @Query('word') word: string,
     @Query('startDate') startDate: Date,
     @Query('endDate') endDate: Date,
     @Query('regionAId') regionAId: number,
     @Query('regionBId') regionBId: number,
-    @Query('sort') sort: number,
+    @Query('sort', ParseIntPipe) sort: number,
     @GetUser() user: User = null,
   ): Promise<ResponseRoomDto[]> {
-    const response = this.roomsService.getRoomsByQuery(1);
-    // const response = this.roomsService.getRoomsByQuery(user ? user.id : 0);
+    const response = this.roomsService.getRoomsByQuery(
+      user ? user.id : 1,
+      category,
+      startDate,
+      endDate,
+      sort ? sort : 1,
+      regionAId,
+      regionBId,
+      word,
+    );
     return response;
   }
 
@@ -75,29 +96,14 @@ export class RoomsController {
    * @Param {number} options 관리 목록 옵션 (1:만든 목록, 2:참여 목록, 3:관심 목록)
    * @GetUser {User} user 접속한 유저에 대한 고유식별자
    */
-  @Get('/management/:option')
+  @Get('/management')
   @ApiOperation({ summary: '채팅방 관리 리스트 API' })
   @ApiOkResponse({ type: ResponseRoomDto })
   getManagementRooms(
-    @Param('option', ParseIntPipe) option: number,
+    @Query('option', ParseIntPipe) option: number,
     @GetUser() user: User,
   ): Promise<ResponseRoomDto[]> {
     const response = this.roomsService.getManagementRooms(option, user.id);
-    return response;
-  }
-
-  /**
-   * 채팅방 생성
-   * @Body {CreateRoomDto} createRoomDto 채팅방 생성 정보
-   * @GetUser {User} user 채팅방 생성 유저에 대한 고유 식별자
-   */
-  @Post('/')
-  @ApiOperation({ summary: '채팅방 생성 API' })
-  async createRoom(
-    @Body() createRoomDto: CreateRoomDto,
-    // @GetUser() user: User,
-  ) {
-    const response = await this.roomsService.createRoom(createRoomDto, 5);
     return response;
   }
 
@@ -143,5 +149,4 @@ export class RoomsController {
 
     return response;
   }
-
 }

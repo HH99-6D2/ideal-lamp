@@ -11,6 +11,8 @@ export class ResponseRoomDto {
 
   spot: string;
 
+  createdDate: string;
+
   startDate: string;
 
   endDate: string;
