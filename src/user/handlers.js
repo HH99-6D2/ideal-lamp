@@ -13,15 +13,14 @@ module.exports = {
 		return reply.send(await listUsers());
 	},
 	getUserHandler: async (req, reply) => {
-		console.log(req.validationError);
-		if (req.valicationError) return reply.code(400).send(E00);
+		if (req.validationError) return reply.code(400).send(E00);
 		const { id } = req.params;
 		const user = await getUser(id);
 
 		return user ? reply.code(200).send(user) : reply.code(404).send(E01);
 	},
 	createUserHandler: async (req, reply) => {
-		if (req.valicationError) reply.code(400).send(E00);
+		if (req.validationError) reply.code(400).send(E00);
 		const { name } = req.body;
 
 		return reply.code(201).send(await createUser(name));
