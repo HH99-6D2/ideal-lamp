@@ -98,7 +98,6 @@ export class RoomsService {
       .innerJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
-      .andWhere('tag.name = :name', { name: '아자아자!' })
       .getMany();
 
     console.log(findRooms.map((x) => x.id));
