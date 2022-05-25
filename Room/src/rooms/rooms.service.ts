@@ -247,7 +247,6 @@ export class RoomsService {
     let findRooms = await query.getMany();
 
     const roomIds = findRooms.map((x) => x.id);
-    console.log(roomIds);
 
     findRooms = await this.roomRepository
       .createQueryBuilder('room')

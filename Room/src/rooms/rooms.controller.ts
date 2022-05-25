@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RoomsService } from './rooms.service';
@@ -16,7 +17,7 @@ import { ResponseRoomDto } from './dto/response-room.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from 'src/entities/user.interface';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import * as moment from 'moment-timezone';
+import { AuthGuard } from '../common/guards/auth.guard';
 
 @Controller('rooms')
 @ApiTags('Room API')
@@ -29,12 +30,13 @@ export class RoomsController {
    * @GetUser {User} user 채팅방 생성 유저에 대한 고유 식별자
    */
   @Post('/')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: '채팅방 생성 API' })
   async createRoom(
     @Body() createRoomDto: CreateRoomDto,
-    // @GetUser() user: User,
+    @GetUser() user: User,
   ) {
-    const response = await this.roomsService.createRoom(createRoomDto, 5);
+    const response = await this.roomsService.createRoom(createRoomDto, user.id);
     return response;
   }
 
@@ -48,9 +50,7 @@ export class RoomsController {
   getRecommendationRooms(
     @GetUser() user: User = null,
   ): Promise<ResponseRoomDto[]> {
-    const response = this.roomsService.getRecommendationRooms(
-      user ? user.id : 1,
-    );
+    const response = this.roomsService.getRecommendationRooms(user ? user.id : 0);
     return response;
   }
 
@@ -79,7 +79,7 @@ export class RoomsController {
     @GetUser() user: User = null,
   ): Promise<ResponseRoomDto[]> {
     const response = this.roomsService.getRoomsByQuery(
-      user ? user.id : 1,
+      user ? user.id : 0,
       category,
       startDate,
       endDate,
@@ -97,6 +97,7 @@ export class RoomsController {
    * @GetUser {User} user 접속한 유저에 대한 고유식별자
    */
   @Get('/management')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: '채팅방 관리 리스트 API' })
   @ApiOkResponse({ type: ResponseRoomDto })
   getManagementRooms(
@@ -125,27 +126,27 @@ export class RoomsController {
 
   // 채팅방 수정
   @Put('/:id')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: '채팅방 수정 API' })
   async updateRoom(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoomDto: UpdateRoomDto,
     @GetUser() user: User,
   ) {
-    const response = await this.roomsService.updateRoom(updateRoomDto, 1);
-    // const response = await this.roomsService.createRoom(createRoomDto, user.id);
+    const response = await this.roomsService.updateRoom(updateRoomDto, user.id);
 
     return response;
   }
 
   // 채팅방 삭제
   @Delete('/:id')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: '채팅방 삭제 API' })
   async deleteRoom(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
   ) {
-    const response = await this.roomsService.deleteRoom(id, 5);
-    // const response = await this.roomsService.deleteRoom(id, user.id);
+    const response = await this.roomsService.deleteRoom(id, user.id);
 
     return response;
   }
