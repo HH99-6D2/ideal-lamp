@@ -45,7 +45,6 @@ const getUserSchema = {
 	response: {
 		200: _User,
 		404: _ErrorMessageSchema,
-		400: _ErrorMessageSchema,
 	},
 };
 
@@ -59,7 +58,7 @@ const createUserSchema = {
 const deleteUserSchema = {
 	params: _IDSchema,
 	response: {
-		200: _ErrorMessageSchema,
+		200: _User,
 		400: _ErrorMessageSchema,
 		404: _ErrorMessageSchema,
 	},
