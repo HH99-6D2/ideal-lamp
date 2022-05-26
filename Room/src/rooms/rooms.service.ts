@@ -8,7 +8,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { Room } from '../entities/room.entity';
-import { Brackets, getManager, In, Not, Repository } from 'typeorm';
+import {
+  Brackets,
+  getConnection,
+  getManager,
+  getRepository,
+  In,
+  Not,
+  Repository,
+} from 'typeorm';
 import { RegionA } from '../entities/regionA.entity';
 import { RegionB } from '../entities/regionB.entity';
 import { Tag } from '../entities/tag.entity';
@@ -19,6 +27,7 @@ import { JoinRoom } from '../entities/joinRoom.entity';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { getEnabledCategories } from 'trace_events';
 import { query } from 'express';
+import { User } from 'src/entities/user.interface';
 
 @Injectable()
 export class RoomsService {
@@ -37,6 +46,11 @@ export class RoomsService {
     private readonly likeRepository: Repository<Like>,
   ) {}
 
+  /**
+   * 채팅방 생성
+   * {CreateRoomDto} createRoomDto 채팅방 생성 정보
+   * {number} userId 채팅방 생성 유저에 대한 고유 식별자
+   */
   async createRoom(createRoomDto: CreateRoomDto, userId: number) {
     const { tags, regionAName, regionBName } = createRoomDto;
 
@@ -89,16 +103,20 @@ export class RoomsService {
     }
   }
 
+  /**
+   * 채팅방 추천 리스트 조회
+   * {number} userId 접속한 유저에 대한 고유식별자
+   */
   async getRecommendationRooms(userId: number): Promise<ResponseRoomDto[]> {
     const resRooms: ResponseRoomDto[] = [];
 
     const findRooms = await this.roomRepository
       .createQueryBuilder('room')
       .where({ status: Not(2) })
-      .innerJoinAndSelect('room.tags', 'tag')
+      .leftJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
-      .andWhere('tag.name = :name', { name: '아자아자!' })
+      .take(20)
       .getMany();
 
     console.log(findRooms.map((x) => x.id));
@@ -159,12 +177,27 @@ export class RoomsService {
         resRooms.push(resRoom);
       }
 
+      resRooms.sort(function (a, b) {
+        return a.likeCnt <= b.likeCnt ? 1 : -1;
+      });
+
       return resRooms;
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
   }
 
+  /**
+   * 채팅방 리스트 조건 조회
+   * {number} userId 접속한 유저에 대한 고유식별자
+   * {string} category 채팅방 주제
+   * {string} tag 태그
+   * {date} startDate 채팅 시작 날짜
+   * {date} endDate 채팅 종료 날짜
+   * {string} regionAId 시/도 정보
+   * {string} regionBId 구/시 정보
+   * {number} sort 정렬 옵션 (1:좋아요순, 2:참여도순, 3:최신순)
+   */
   async getRoomsByQuery(
     userId: number,
     category: string,
@@ -177,20 +210,10 @@ export class RoomsService {
   ): Promise<ResponseRoomDto[]> {
     const resRooms: ResponseRoomDto[] = [];
 
-    console.log(
-      category,
-      moment(startDate),
-      moment(endDate).add(1, 'days'),
-      regionAId,
-      regionBId,
-      sort,
-      word,
-    );
-
     let query = await this.roomRepository
       .createQueryBuilder('room')
       .where({ status: Not(2) })
-      .innerJoinAndSelect('room.tags', 'tag')
+      .leftJoinAndSelect('room.tags', 'tag')
       .andWhere('room.category = :category', { category })
       .andWhere(
         new Brackets((query) => {
@@ -244,14 +267,14 @@ export class RoomsService {
       query.andWhere('room.regionB = :regionB', { regionB: regionBId });
     }
 
-    let findRooms = await query.getMany();
+    let findRooms = await query.take(20).getMany();
 
     const roomIds = findRooms.map((x) => x.id);
 
     findRooms = await this.roomRepository
       .createQueryBuilder('room')
       .whereInIds(roomIds)
-      .innerJoinAndSelect('room.tags', 'tag')
+      .leftJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
       .getMany();
@@ -339,21 +362,24 @@ export class RoomsService {
     }
   }
 
+  /**
+   * 채팅방 관리 리스트 조회
+   * {number} userId 접속한 유저에 대한 고유식별자
+   * {number} option 조회 타입 (1:만든 채팅, 2:참여 채팅, 3:관심 채팅)
+   */
   async getManagementRooms(
-    option: number,
     userId: number,
+    option: number,
   ): Promise<ResponseRoomDto[]> {
-    const resRooms: ResponseRoomDto[] = [];
+    let resRooms: ResponseRoomDto[] = [];
 
     const findRooms = await this.roomRepository
       .createQueryBuilder('room')
       .where({ status: Not(2) })
-      .innerJoinAndSelect('room.tags', 'tag')
+      .leftJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
       .getMany();
-
-    console.log(findRooms);
 
     if (findRooms.length < 1) {
       throw new NotFoundException();
@@ -396,7 +422,37 @@ export class RoomsService {
           .getCount();
         resRoom.likeCnt = likeCnt;
 
+        const isJoined = await this.joinRoomRepository.findOne({
+          userId,
+          roomId: resRoom.id,
+        });
+        resRoom.isJoined = isJoined ? true : false;
+
+        const joinCnt = await this.joinRoomRepository
+          .createQueryBuilder('joinRoom')
+          .where({ roomId: findRoom.id })
+          .getCount();
+        resRoom.joinCnt = joinCnt;
+
         resRooms.push(resRoom);
+      }
+
+      switch (option) {
+        case 1: //만든 목록
+          resRooms = resRooms.filter((x) => {
+            if (x.userId === userId) return x;
+          });
+          break;
+        case 2: // 참여 목록
+          resRooms = resRooms.filter((x) => {
+            if (x.isJoined) return x;
+          });
+          break;
+        case 3: // 관심 목록
+          resRooms = resRooms.filter((x) => {
+            if (x.isLike) return x;
+          });
+          break;
       }
 
       return resRooms;
@@ -405,13 +461,18 @@ export class RoomsService {
     }
   }
 
-  async getRoomById(id: number, userId: number): Promise<ResponseRoomDto> {
+  /**
+   * 채팅방 상세 조회
+   * {number} userId 접속한 유저에 대한 고유식별자
+   * {number} id 채팅방에 대한 고유 식별자
+   */
+  async getRoomById(userId: number, id: number): Promise<ResponseRoomDto> {
     let resRoom: ResponseRoomDto = new ResponseRoomDto();
 
     const findRoom = await this.roomRepository
       .createQueryBuilder('room')
       .where({ id, status: Not(2) })
-      .innerJoinAndSelect('room.tags', 'tag')
+      .leftJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
       .getOne();
@@ -474,8 +535,23 @@ export class RoomsService {
     return resRoom;
   }
 
-  async updateRoom(updateRoomDto: UpdateRoomDto, userId: number) {
+  /**
+   * 채팅방 수정
+   * {number} userId 접속한 유저에 대한 고유식별자
+   * {number} id 채팅방에 대한 고유 식별자
+   * {UpdateRoomDto} updateRoomDto 채팅방 수정 정보
+   */
+  async updateRoom(userId: number, id: number, updateRoomDto: UpdateRoomDto) {
     const { tags, regionAName, regionBName } = updateRoomDto;
+
+    const temp = await getConnection()
+      .createQueryBuilder()
+      .delete()
+      .from('room_tags_tag')
+      .where('roomId = :roomId', { roomId: id })
+      .execute();
+
+    console.log(temp);
 
     try {
       const regionA = await this.regionARepository.findOne({
@@ -488,6 +564,7 @@ export class RoomsService {
       });
 
       let roomTags: Tag[] = [];
+      let joinTags: Array<object> = [];
 
       for (const tag of tags) {
         const findTag = await this.tagRepository.findOne({
@@ -496,25 +573,38 @@ export class RoomsService {
 
         if (findTag) {
           roomTags.push(findTag);
+          joinTags.push({
+            roomId: id,
+            tagId: findTag.id,
+          });
         } else {
           const insertTag = this.tagRepository.create({
             name: tag.toString(),
           });
           await insertTag.save();
           roomTags.push(insertTag);
+          joinTags.push({
+            roomId: id,
+            tagId: insertTag.id,
+          });
         }
       }
 
-      const room = this.roomRepository.create({
-        ...updateRoomDto,
+      await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into('room_tags_tag')
+        .values(joinTags)
+        .execute();
+
+      const room = this.roomRepository.update(id, {
         userId,
         status: new Date(updateRoomDto.startDate) <= new Date() ? 1 : 0,
         regionA: regionA.id,
         regionB: regionB.id,
-        tags: roomTags,
       });
 
-      const response = await this.roomRepository.save(room);
+      // const response = await this.roomRepository.save(room);
 
       return {
         status: 'success',
@@ -525,7 +615,12 @@ export class RoomsService {
     }
   }
 
-  async deleteRoom(id: number, userId: number) {
+  /**
+   * 채팅방 삭제
+   * {number} userId 접속한 유저에 대한 고유식별자
+   * {number} id 채팅방에 대한 고유 식별자
+   */
+  async deleteRoom(userId: number, id: number) {
     const findRoom = await this.roomRepository.findOne({ id, userId });
 
     if (findRoom.userId !== userId) {

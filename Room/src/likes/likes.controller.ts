@@ -1,14 +1,14 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Delete } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { User } from '../entities/user.interface';
 import { GetUser } from '../common/decorators/get-user.decorator';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 
 @Controller('rooms/likes')
 @ApiTags('Like API')
@@ -17,21 +17,36 @@ export class LikesController {
 
   @Get('/:roomId')
   @ApiOperation({ summary: '채팅방 좋아요 API' })
+  @ApiBearerAuth('token')
+  @ApiParam({
+    name: 'roomId',
+    type: 'number',
+    required: true,
+    example: 1,
+    description: '채팅방에 대한 고유 식별자',
+  })
+  @ApiOkResponse({type:'string'})
   createLike(
     @Param('roomId', ParseIntPipe) roomId: number,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.likesService.createLike(roomId, 1);
-    // return this.likesService.createLike(roomId, user.id);
+    return this.likesService.createLike( user.id, roomId);
   }
 
   @Delete('/:roomId')
   @ApiOperation({ summary: '채팅방 좋아요 취소 API' })
+  @ApiBearerAuth('token')
+  @ApiParam({
+    name: 'roomId',
+    type: 'number',
+    required: true,
+    example: 1,
+    description: '채팅방에 대한 고유 식별자',
+  })
   deleteLike(
     @Param('roomId', ParseIntPipe) roomId: number,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.likesService.deleteLike(roomId, 1);
-    // return this.likesService.deleteLike(roomId, user.id);
+    return this.likesService.deleteLike(user.id, roomId);
   }
 }

@@ -13,11 +13,19 @@ export class RegionsService {
     private regionBRepository: Repository<RegionB>,
   ) {}
 
+  /**
+   * 시/도 조회
+   * {number} id 채팅방에 대한 고유 식별자
+   */
   async getAllRegionA(): Promise<RegionA[]> {
     const regionAs = await this.regionARepository.find();
     return regionAs;
   }
 
+  /**
+   * 구/시 조회
+   * {number} regionAId 시/도 고유 식별자
+   */
   async getRegionBByAId(regionAId: number): Promise<RegionB[]> {
     const regionBs = await this.regionBRepository.find({ regionAId });
     return regionBs;
