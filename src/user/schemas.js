@@ -52,6 +52,7 @@ const createUserSchema = {
 	body: _NameBodySchema,
 	response: {
 		201: _User,
+		409: _ErrorMessageSchema,
 	},
 };
 
