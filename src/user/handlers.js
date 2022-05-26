@@ -6,7 +6,7 @@ const {
 	deleteUser,
 	updateUser,
 } = require("./functions");
-const { E00, E01 } = require("../utils/errnos");
+const { E00, E01, E02 } = require("../utils/errnos");
 
 module.exports = {
 	listUserHandler: async (req, reply) => {
@@ -22,8 +22,10 @@ module.exports = {
 	createUserHandler: async (req, reply) => {
 		if (req.validationError) reply.code(400).send(E00);
 		const { name } = req.body;
-
-		return reply.code(201).send(await createUser(name));
+		const id = await createUser(name);
+		return id
+			? reply.code(201).send({ id, name })
+			: reply.code(409).send(E02);
 	},
 	deleteUserHandler: async (req, reply) => {
 		if (req.valicationError) reply.code(400).send(E00);

@@ -9,5 +9,10 @@ const Errnos = {
 		error: "Resource Not Found",
 		message: `User Resource not found`,
 	},
+	E02: {
+		statusCode: 409,
+		error: "Resource Conflict",
+		message: `User Resource cannot be as input`,
+	},
 };
 module.exports = Errnos;
