@@ -55,7 +55,7 @@ test(`Test on "users/" for create user`, async (t) => {
 				const name = "doe";
 				const expected = 0;
 				const created = await functionModule.createUser(name);
-				t.equal(created, expected.id);
+				t.equal(created, expected);
 			},
 		);
 	});
