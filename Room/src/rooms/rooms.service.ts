@@ -213,9 +213,23 @@ export class RoomsService {
     let query = await this.roomRepository
       .createQueryBuilder('room')
       .where({ status: Not(2) })
-      .leftJoinAndSelect('room.tags', 'tag')
-      .andWhere('room.category = :category', { category })
-      .andWhere(
+      .leftJoinAndSelect('room.tags', 'tag');
+
+    if (category) {
+      query.andWhere('room.category = :category', { category });
+    }
+    if (word) {
+      query.andWhere(
+        new Brackets((query) => {
+          query
+            .andWhere('tag.name = :name', { name: word })
+            .orWhere('room.spot = :spot', { spot: word });
+        }),
+      );
+    }
+
+    if (startDate && endDate) {
+      query.andWhere(
         new Brackets((query) => {
           query
             .where(
@@ -246,15 +260,6 @@ export class RoomsService {
                   .andWhere('room.endDate <= :endDate', { endDate });
               }),
             );
-        }),
-      );
-
-    if (word) {
-      query.andWhere(
-        new Brackets((query) => {
-          query
-            .andWhere('tag.name = :name', { name: word })
-            .orWhere('room.spot = :spot', { spot: word });
         }),
       );
     }
