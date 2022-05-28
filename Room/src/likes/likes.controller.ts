@@ -1,8 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, Delete } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Delete, UseGuards } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { User } from '../entities/user.interface';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { ApiParam } from '@nestjs/swagger';
+import { AuthGuard } from '../common/guards/auth.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -18,6 +19,7 @@ export class LikesController {
   @Get('/:roomId')
   @ApiOperation({ summary: '채팅방 좋아요 API' })
   @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
   @ApiParam({
     name: 'roomId',
     type: 'number',
@@ -36,6 +38,7 @@ export class LikesController {
   @Delete('/:roomId')
   @ApiOperation({ summary: '채팅방 좋아요 취소 API' })
   @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
   @ApiParam({
     name: 'roomId',
     type: 'number',
