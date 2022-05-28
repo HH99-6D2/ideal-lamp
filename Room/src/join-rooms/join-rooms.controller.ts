@@ -1,8 +1,9 @@
-import { Controller, Delete, Param, ParseIntPipe, Get } from '@nestjs/common';
+import { Controller, Delete, Param, ParseIntPipe, Get, UseGuards } from '@nestjs/common';
 import { JoinRoomsService } from './join-rooms.service';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from 'src/entities/user.interface';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { AuthGuard } from '../common/guards/auth.guard';
 
 
 @Controller('rooms/join')
@@ -13,6 +14,7 @@ export class JoinRoomsController {
   @Get('/:roomId')
   @ApiOperation({ summary: '채팅방 참여 API' })
   @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
   @ApiParam({
     name: 'roomId',
     type: 'number',
@@ -28,6 +30,7 @@ export class JoinRoomsController {
   @Delete('/:roomId')
   @ApiOperation({ summary: '채팅방 나가기 API' })
   @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
   @ApiParam({
     name: 'roomId',
     type: 'number',
