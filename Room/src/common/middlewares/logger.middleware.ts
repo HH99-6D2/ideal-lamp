@@ -7,14 +7,12 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     res.on('finish', () => {
       this.logger.verbose(
-        `${req.method} reqQuery: ${JSON.stringify(req.query)}, reqBody: ${JSON.stringify(req.body)}
-         resBody: ${arguments}`,
+        `${req.method} - ${res.statusCode} reqQuery: ${JSON.stringify(
+          req.query,
+        )}, reqBody: ${JSON.stringify(req.body)}`,
         req.originalUrl,
       );
-
-    })
-
-
+    });
     next();
   }
 }
