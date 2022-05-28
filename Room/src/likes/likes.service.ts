@@ -15,7 +15,7 @@ export class LikesService {
    * {number} userId 접속한 유저에 대한 고유식별자
    * {number} roomId 채팅방에 대한 고유 식별자
    */
-  async createLike(roomId: number, userId: number): Promise<void> {
+  async createLike(userId: number, roomId: number): Promise<void> {
     const like = this.likeRepository.create({
       userId,
       roomId,
@@ -29,7 +29,7 @@ export class LikesService {
    * {number} userId 접속한 유저에 대한 고유식별자
    * {number} roomId 채팅방에 대한 고유 식별자
    */
-  async deleteLike(roomId: number, userId: number): Promise<void> {
+  async deleteLike(userId: number, roomId: number): Promise<void> {
     const unLike = this.likeRepository.delete({
       userId,
       roomId,
