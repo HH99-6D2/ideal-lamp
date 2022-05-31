@@ -3,6 +3,24 @@ ideal-lamp
 
 Nodejs based Chatting socket reboot
 
+PLUGINS: @fasityfy/autoload
+---------------------------
+
+Fastify를 위한 유용한 플럭-인으로, 해당 디렉터리에 모든 플럭-인을 로그하고 자동적으로 폴더구조에 맞는 routes를 설정한다.
+
+EXAMPLE 
+^^^^^^^
+
+   .. code-block:: javascript
+
+      // app.js
+
+      app.register(autoload, {
+          dir: path.join(__dirname, "plugins");
+      });
+
+      app.listen(3000);
+
 User
 ----
 
