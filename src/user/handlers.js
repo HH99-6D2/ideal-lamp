@@ -6,25 +6,26 @@ const {
 	deleteUser,
 	updateUser,
 } = require("./functions");
-const { E00, E01 } = require("../utils/errnos");
+const { E00, E01, E02 } = require("../utils/errnos");
 
 module.exports = {
 	listUserHandler: async (req, reply) => {
 		return reply.send(await listUsers());
 	},
 	getUserHandler: async (req, reply) => {
-		console.log(req.validationError);
-		if (req.valicationError) return reply.code(400).send(E00);
+		if (req.validationError) return reply.code(400).send(E00);
 		const { id } = req.params;
 		const user = await getUser(id);
 
 		return user ? reply.code(200).send(user) : reply.code(404).send(E01);
 	},
 	createUserHandler: async (req, reply) => {
-		if (req.valicationError) reply.code(400).send(E00);
+		if (req.validationError) reply.code(400).send(E00);
 		const { name } = req.body;
-
-		return reply.code(201).send(await createUser(name));
+		const id = await createUser(name);
+		return id
+			? reply.code(201).send({ id, name })
+			: reply.code(409).send(E02);
 	},
 	deleteUserHandler: async (req, reply) => {
 		if (req.valicationError) reply.code(400).send(E00);
