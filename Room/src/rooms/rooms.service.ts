@@ -112,7 +112,7 @@ export class RoomsService {
 
     const findRooms = await this.roomRepository
       .createQueryBuilder('room')
-      .where({ status: Not(2) })
+      .where({ status: 1 })
       .leftJoinAndSelect('room.tags', 'tag')
       .innerJoinAndSelect('room.regionA', 'regionA')
       .innerJoinAndSelect('room.regionB', 'regionB')
@@ -178,7 +178,7 @@ export class RoomsService {
       }
 
       resRooms.sort(function (a, b) {
-        return a.likeCnt <= b.likeCnt ? 1 : -1;
+        return a.joinCnt <= b.joinCnt ? 1 : -1;
       });
 
       return resRooms;
