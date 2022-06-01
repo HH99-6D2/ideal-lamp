@@ -9,7 +9,7 @@ test(`Test on "users/"`, async (t) => {
 		t.app = await build(t);
 		t.users = require("../../src/models/user");
 	});
-	t.test('POST:createUser(JSON) - "/users", expect 201', async (t) => {
+	t.test('PATCH:createUser(JSON) - "/users", expect 415', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
@@ -40,16 +40,16 @@ test(`Test on "users/"`, async (t) => {
 		t.equal(res.headers["content-type"], "application/json; charset=utf-8");
 		t.same(res.payload, JSON.stringify({ id: 1 }));
 	});
-	/*
 	t.test('POST:createUser - "/users", expect 400', async (t) => {
-		t.plan(2);
+		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
 			url: "/users",
 			payload: {},
+			headers: {
+				"content-type": "application/x-www-form-urlencoded",
+			},
 		});
 		t.equal(res.statusCode, 400, "return a status code of 400");
-		t.equal(res.headers["content-type"], "application/json; charset=utf-8");
 	});
-	*/
 });
