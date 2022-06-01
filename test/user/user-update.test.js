@@ -4,12 +4,12 @@ const { build } = require("../helper");
 
 test(`Test on "users/"`, async (t) => {
 	t.plan(5);
-	/* OK200:url id 인수 값 테스트 */
 	t.beforeEach(async (t) => {
 		t.app = await build(t);
 		t.users = require("../../src/models/user");
 	});
-	// 1. Test SUCCESS
+
+	// 1. Test SUCCESS / 204 / NOT MODIFIED
 	t.test('PUT:updateUser(FORM) - "/users", expect 204', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
@@ -24,7 +24,8 @@ test(`Test on "users/"`, async (t) => {
 		});
 		t.equal(res.statusCode, 204, "return a status code of 204");
 	});
-	// 2. Test FAIL BAD content Type
+
+	// 2. Test FAIL / 415 / BAD CONTENT TYPE
 	t.test('PUT:updateUser(JSON) - "/users", expect 415', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
@@ -40,7 +41,7 @@ test(`Test on "users/"`, async (t) => {
 		t.equal(res.statusCode, 415, "return a status code of 415");
 	});
 
-	// 3. Test FAIL BAD content request
+	// 3. Test FAIL / 400 / BAD REQUEST
 	t.test('PUT:updateUser - "/users", expect 400', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
@@ -54,8 +55,8 @@ test(`Test on "users/"`, async (t) => {
 		t.equal(res.statusCode, 400, "return a status code of 400");
 	});
 
-	// 4. Test FAIL BAD url request
-	t.test('PUT:updateUser - "/users/badurl", expect 400', async (t) => {
+	// 4. Test FAIL / 404 / RESOUCE NOT FOUND
+	t.test('PUT:updateUser - "/users/9999", expect 404', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
@@ -64,10 +65,10 @@ test(`Test on "users/"`, async (t) => {
 				"content-type": "application/x-www-form-urlencoded",
 			},
 		});
-		t.equal(res.statusCode, 400, "return a status code of 404");
+		t.equal(res.statusCode, 404, "return a status code of 404");
 	});
 
-	// 5. Test FAIL not found resouce
+	// 5. Test FAIL / 404 / RESOUCE NOT FOUND
 	t.test('PUT:updateUser - "/users/9999", expect 404', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
