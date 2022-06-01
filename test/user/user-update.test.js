@@ -13,7 +13,7 @@ test(`Test on "users/"`, async (t) => {
 	t.test('PUT:updateUser(FORM) - "/users", expect 204', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
-			method: "POST",
+			method: "PUT",
 			url: "/users/1",
 			payload: {
 				name: "testUser",
@@ -55,12 +55,12 @@ test(`Test on "users/"`, async (t) => {
 		t.equal(res.statusCode, 400, "return a status code of 400");
 	});
 
-	// 4. Test FAIL / 404 / RESOUCE NOT FOUND
+	// 4. Test FAIL / 404 / RESOURCE NOT FOUND
 	t.test('PUT:updateUser - "/users/9999", expect 404', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
-			url: "/users/badurl",
+			url: "/users/9999",
 			headers: {
 				"content-type": "application/x-www-form-urlencoded",
 			},
@@ -68,12 +68,12 @@ test(`Test on "users/"`, async (t) => {
 		t.equal(res.statusCode, 404, "return a status code of 404");
 	});
 
-	// 5. Test FAIL / 404 / RESOUCE NOT FOUND
-	t.test('PUT:updateUser - "/users/9999", expect 404', async (t) => {
+	// 5. Test FAIL / 404 / RESOURCE NOT FOUND
+	t.test('PUT:updateUser - "/users/badurl", expect 404', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
-			url: "/users/9999",
+			url: "/users/badurl",
 			payload: {},
 			headers: {
 				"content-type": "application/x-www-form-urlencoded",

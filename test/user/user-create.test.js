@@ -8,6 +8,7 @@ test(`Test on "users/"`, async (t) => {
 		t.app = await build(t);
 		t.users = require("../../src/models/user");
 	});
+
 	// 1. Test SUCCESS / 201 / CREATED
 	t.test('POST:createUser(FORM) - "/users", expect 201', async (t) => {
 		t.plan(3);
@@ -27,7 +28,7 @@ test(`Test on "users/"`, async (t) => {
 	});
 
 	// 2. Test FAIL / 415 / BAD CONTENT TYPE
-	t.test('PATCH:createUser(JSON) - "/users", expect 415', async (t) => {
+	t.test('POST:createUser(JSON) - "/users", expect 415', async (t) => {
 		t.plan(1);
 		const res = await t.app.inject({
 			method: "POST",
