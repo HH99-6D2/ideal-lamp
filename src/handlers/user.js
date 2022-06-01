@@ -1,11 +1,10 @@
-const users = require("./users");
 const {
 	listUsers,
 	getUser,
 	createUser,
 	deleteUser,
 	updateUser,
-} = require("./functions");
+} = require("../services/user");
 const { E00, E01, E02 } = require("../utils/errnos");
 
 module.exports = {
