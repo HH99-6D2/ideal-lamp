@@ -1,10 +1,12 @@
+"use strict";
+
 const {
 	listUserHandler,
 	getUserHandler,
 	createUserHandler,
 	deleteUserHandler,
 	updateUserHandler,
-} = require("./handlers");
+} = require("../handlers/user");
 
 const {
 	listUserSchema,
@@ -12,7 +14,7 @@ const {
 	createUserSchema,
 	deleteUserSchema,
 	updateUserSchema,
-} = require("./schemas");
+} = require("../schemas/user");
 
 const listUserOpts = {
 	schema: listUserSchema,
@@ -43,7 +45,7 @@ const updateUserOpts = {
 	attachValidation: true,
 };
 
-function itemRoutes(fastify, option, done) {
+function userRoutes(fastify, option, done) {
 	// GET all users
 	fastify.get("/users", listUserOpts);
 
@@ -61,4 +63,4 @@ function itemRoutes(fastify, option, done) {
 
 	done();
 }
-module.exports = itemRoutes;
+module.exports = userRoutes;

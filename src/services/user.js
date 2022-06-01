@@ -1,4 +1,4 @@
-const users = require("./users");
+const users = require("../models/user");
 
 async function listUsers() {
 	return users;
@@ -10,10 +10,15 @@ async function getUser(id) {
 
 async function createUser(name) {
 	const result =
-		name && users.find((user) => user.name === name)
-			? 0
+		users.find((user) => user.name === name)
+			? undefined
 			: users.push({ id: users.length + 1, name });
 	return result;
+	/*
+	return result ?
+		result :
+		USER_CREATE_ERR_001;
+	*/
 }
 
 async function deleteUser(id) {
